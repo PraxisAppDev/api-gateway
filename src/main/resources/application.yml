@@ -1,0 +1,45 @@
+
+server:
+  port: 9000
+  
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka
+  
+logging:
+  level:
+    org:
+      springframework:
+        cloud:
+          gateway: TRACE
+  
+ribbon:
+  eureka:
+    enabled: false
+      
+spring:
+  application:
+    name: AFTERHOURS API Gateway
+  cloud:
+    gateway:
+      routes:
+      - id: UserService
+        uri: lb://USER-SERVICE
+        predicates:
+        - Path=/afterhours/user/**  
+        filters:
+        - RewritePath=/afterhours/user/(?<segment>.*), /userservice/$\{segment}
+      - id: HuntService
+        uri: lb://HUNT-SERVICE
+        predicates:
+        - Path=/afterhours/hunt/**  
+        filters:
+        - RewritePath=/afterhours/(?<segment>.*), /huntservice/$\{segment} 
+        
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health
